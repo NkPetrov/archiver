@@ -7,15 +7,15 @@ import (
 
 type encodingTable map[rune]string
 
-func Encode(str string) string {
+func Encode(str string) []byte {
 	str = prepareText(str)
 	chunks := splitByChunks(encodeBin(str), chunkSize)
 
-	return chunks.ToHex().ToString()
+	return chunks.Bytes()
 }
 
-func Decode(encodedText string) string {
-	bString := NewHexChunks(encodedText).ToBinary().Join()
+func Decode(encodedData []byte) string {
+	bString := NewBinChunks(encodedData).Join()
 	dTree := getEncodingTable().DecodingTree()
 
 	return exportText(dTree.Decode(bString))
@@ -99,21 +99,25 @@ func prepareText(str string) string {
 //	i.g.: !my name is !ted -> My name is Ted.
 func exportText(str string) string {
 	var buf strings.Builder
+
 	var isCapital bool
 
 	for _, ch := range str {
 		if isCapital {
 			buf.WriteRune(unicode.ToUpper(ch))
 			isCapital = false
+
 			continue
 		}
 
 		if ch == '!' {
 			isCapital = true
+
 			continue
 		} else {
 			buf.WriteRune(ch)
 		}
 	}
+
 	return buf.String()
 }
